@@ -7,7 +7,7 @@ import {
   getAdminGallery,
   addGalleryItem,
   deleteGalleryItem,
-  DEFAULT_GALLERY,
+  getAllGalleryItems,
 } from '../data';
 
 const CATEGORIES = ['Health', 'Education', 'Relief', 'Community', 'Culture'];
@@ -107,8 +107,8 @@ export default function AdminPage() {
     setGallery(updated);
   };
 
-  // Combine admin + default for display
-  const allItems = [...gallery, ...DEFAULT_GALLERY];
+  // Fetch all items including filtered default gallery
+  const allItems = getAllGalleryItems();
 
   // ===== LOGIN SCREEN =====
   if (!authenticated) {
@@ -486,23 +486,29 @@ export default function AdminPage() {
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        {item.id?.startsWith('admin-') ? (
                           <button
-                            onClick={() => handleDelete(item.id)}
+                            onClick={() => {
+                              handleDelete(item.id);
+                              // Force re-fetch from storage to update UI if it was a default item
+                              if (!item.id.startsWith('admin-')) {
+                                setGallery(getAdminGallery());
+                              }
+                            }}
                             title="Delete"
                             style={{
                               color: 'var(--outline)',
                               padding: 4,
                               transition: 'color 0.2s',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4
                             }}
-                            onMouseEnter={(e) => (e.target.style.color = 'var(--error)')}
-                            onMouseLeave={(e) => (e.target.style.color = 'var(--outline)')}
+                            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--error)')}
+                            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--outline)')}
                           >
+                            {!item.id.startsWith('admin-') && <span className="label-md" style={{ fontSize: 11, marginRight: 8, opacity: 0.7 }}>Default</span>}
                             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>delete</span>
                           </button>
-                        ) : (
-                          <span className="label-md" style={{ color: 'var(--outline)', fontSize: 11 }}>Default</span>
-                        )}
                       </td>
                     </tr>
                   ))}
@@ -521,7 +527,7 @@ export default function AdminPage() {
               marginTop: 'auto',
             }}>
               <span className="body-md" style={{ color: 'var(--on-surface-variant)', fontSize: 14 }}>
-                {gallery.length} admin-uploaded, {DEFAULT_GALLERY.length} default
+                {gallery.length} admin-uploaded, {allItems.length - gallery.length} default
               </span>
             </div>
           </div>

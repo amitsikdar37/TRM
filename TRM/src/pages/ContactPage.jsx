@@ -112,9 +112,9 @@ export default function ContactPage() {
             </h2>
 
             {[
-              { icon: 'location_on', title: 'Headquarters', text: 'Oodlabari, Jalpaiguri\nWest Bengal, India' },
-              { icon: 'phone', title: 'Phone Line', text: '+91 (XXX) XXX-XXXX\nMon-Fri, 9am - 5pm IST' },
-              { icon: 'mail', title: 'Email Us', text: 'hello@revivalmission.org' },
+              { icon: 'location_on', title: 'Headquarters', text: 'Oodlabari, Jalpaiguri\nWest Bengal, India', link: 'https://maps.app.goo.gl/QLFfvZKXRJwfcwYZ6' },
+              { icon: 'phone', title: 'Phone Line', text: '+91 9800221123\nMon-Fri, 9am - 5pm IST', link: 'tel:+919800221123' },
+              { icon: 'mail', title: 'Email Us', text: 'therevivalmission60@gmail.com', link: 'mailto:therevivalmission60@gmail.com' },
             ].map((info) => (
               <div
                 key={info.title}
@@ -154,9 +154,23 @@ export default function ContactPage() {
                   <h3 className="label-md" style={{ fontWeight: 700, color: 'var(--on-surface)', marginBottom: 4 }}>
                     {info.title}
                   </h3>
-                  <p className="body-md" style={{ color: 'var(--on-surface-variant)', whiteSpace: 'pre-line' }}>
+                  <a
+                    href={info.link}
+                    target={info.icon === 'location_on' ? '_blank' : '_self'}
+                    rel={info.icon === 'location_on' ? 'noopener noreferrer' : ''}
+                    className="body-lg" 
+                    style={{ 
+                      color: 'var(--on-surface-variant)', 
+                      whiteSpace: 'pre-line',
+                      textDecoration: 'none',
+                      transition: 'color 0.2s',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = 'var(--primary)'}
+                    onMouseLeave={(e) => e.target.style.color = 'var(--on-surface-variant)'}
+                  >
                     {info.text}
-                  </p>
+                  </a>
                 </div>
               </div>
             ))}

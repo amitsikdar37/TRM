@@ -159,14 +159,26 @@ export function addGalleryItem(item) {
 }
 
 export function deleteGalleryItem(id) {
-  const items = getAdminGallery().filter(item => item.id !== id);
-  saveAdminGallery(items);
-  return items;
+  if (id.startsWith('admin-')) {
+    const items = getAdminGallery().filter(item => item.id !== id);
+    saveAdminGallery(items);
+    return items;
+  } else {
+    // It's a default item, add to hidden list
+    const hidden = JSON.parse(localStorage.getItem('trm_hidden_defaults') || '[]');
+    if (!hidden.includes(id)) {
+      hidden.push(id);
+      localStorage.setItem('trm_hidden_defaults', JSON.stringify(hidden));
+    }
+    return getAdminGallery(); // The component will re-fetch all items
+  }
 }
 
 export function getAllGalleryItems() {
   const adminItems = getAdminGallery();
-  return [...adminItems, ...DEFAULT_GALLERY];
+  const hidden = JSON.parse(localStorage.getItem('trm_hidden_defaults') || '[]');
+  const visibleDefaults = DEFAULT_GALLERY.filter(item => !hidden.includes(item.id));
+  return [...adminItems, ...visibleDefaults];
 }
 
 // Auth helpers
