@@ -80,7 +80,12 @@ const DEFAULT_GALLERY = [
   },
 ];
 
-mongoose.connect(process.env.MONGODB_URI)
+const envName = process.env.NODE_ENV === 'production' ? 'production' : 'development';
+const mongoUri = envName === 'production' 
+  ? process.env.MONGODB_URI_PROD 
+  : process.env.MONGODB_URI_DEV;
+
+mongoose.connect(mongoUri)
   .then(async () => {
     console.log('Connected to MongoDB. Seeding data...');
     

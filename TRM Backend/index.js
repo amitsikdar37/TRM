@@ -14,7 +14,11 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
+const mongoUri = process.env.NODE_ENV === 'production' 
+  ? process.env.MONGODB_URI_PROD 
+  : process.env.MONGODB_URI_DEV;
+
+mongoose.connect(mongoUri)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 

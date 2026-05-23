@@ -133,7 +133,7 @@ export const METRICS = [
 // Admin password
 export const ADMIN_PASSWORD = 'admin123';
 
-const API_URL = 'http://localhost:5000/api/gallery';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/gallery';
 const AUTH_KEY = 'trm_admin_auth';
 
 // Gallery helpers
