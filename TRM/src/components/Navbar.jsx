@@ -103,7 +103,7 @@ export default function Navbar() {
               className="headline-md"
               style={{ color: 'var(--primary)', fontWeight: 700 }}
             >
-              Revival Mission
+              The Revival Mission
             </span>
           </Link>
 

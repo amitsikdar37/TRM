@@ -15,7 +15,11 @@ export default function GalleryPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setItems(getAllGalleryItems());
+    const fetchGallery = async () => {
+      const data = await getAllGalleryItems();
+      setItems(data);
+    };
+    fetchGallery();
   }, []);
 
   useEffect(() => {

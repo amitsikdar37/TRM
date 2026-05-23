@@ -107,7 +107,7 @@ export default function AboutPage() {
             className="about-hero-sub body-lg"
             style={{ color: 'var(--on-surface-variant)', maxWidth: 650 }}
           >
-            Since our inception, Revival Mission has operated on the foundational belief that sustainable change requires an institutional commitment to compassion and radical transparency.
+            Since our inception, The Revival Mission has operated on the foundational belief that sustainable change requires an institutional commitment to compassion and radical transparency.
           </p>
         </div>
       </section>
@@ -144,7 +144,7 @@ export default function AboutPage() {
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
               <p className="body-md" style={{ color: 'var(--on-surface-variant)' }}>
-                Revival Mission was born from a simple yet profound realization: real community empowerment requires more than temporary relief; it demands structural support, enduring trust, and a commitment to walking alongside those in need. We are a collective of dedicated volunteers, professionals, and community leaders united by a shared vision.
+                The Revival Mission was born from a simple yet profound realization: real community empowerment requires more than temporary relief; it demands structural support, enduring trust, and a commitment to walking alongside those in need. We are a collective of dedicated volunteers, professionals, and community leaders united by a shared vision.
               </p>
               <p className="body-md" style={{ color: 'var(--on-surface-variant)' }}>
                 We operate with the stability of a global organization but the heartbeat of a local grassroots movement. By focusing on direct community engagement, rigorous transparency in our operations, and data-driven impact strategies, we ensure that every contribution translates into meaningful, measurable change.

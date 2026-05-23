@@ -4,7 +4,6 @@ import {
   isAdminAuthenticated,
   loginAdmin,
   logoutAdmin,
-  getAdminGallery,
   addGalleryItem,
   deleteGalleryItem,
   getAllGalleryItems,
@@ -16,7 +15,7 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [gallery, setGallery] = useState([]);
+  const [allItems, setAllItems] = useState([]);
   const [form, setForm] = useState({ title: '', date: '', category: 'Health', description: '' });
   const [dragOver, setDragOver] = useState(false);
   const [preview, setPreview] = useState(null);
@@ -25,10 +24,15 @@ export default function AdminPage() {
   const loginBoxRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  const fetchItems = async () => {
+    const items = await getAllGalleryItems();
+    setAllItems(items);
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setAuthenticated(isAdminAuthenticated());
-    setGallery(getAdminGallery());
+    fetchItems();
   }, []);
 
   // Login animation
@@ -43,7 +47,7 @@ export default function AdminPage() {
     if (loginAdmin(password)) {
       setAuthenticated(true);
       setError('');
-      setGallery(getAdminGallery());
+      fetchItems();
     } else {
       setError('Invalid password');
       if (loginBoxRef.current) {
@@ -76,7 +80,7 @@ export default function AdminPage() {
     handleFileSelect(file);
   };
 
-  const handlePublish = (e) => {
+  const handlePublish = async (e) => {
     e.preventDefault();
     if (!form.title || !fileData) return;
 
@@ -89,8 +93,8 @@ export default function AdminPage() {
       large: false,
     };
 
-    const updated = addGalleryItem(newItem);
-    setGallery(updated);
+    await addGalleryItem(newItem);
+    await fetchItems();
     setForm({ title: '', date: '', category: 'Health', description: '' });
     setPreview(null);
     setFileData(null);
@@ -102,13 +106,10 @@ export default function AdminPage() {
     }, 3000);
   };
 
-  const handleDelete = (id) => {
-    const updated = deleteGalleryItem(id);
-    setGallery(updated);
+  const handleDelete = async (id) => {
+    await deleteGalleryItem(id);
+    await fetchItems();
   };
-
-  // Fetch all items including filtered default gallery
-  const allItems = getAllGalleryItems();
 
   // ===== LOGIN SCREEN =====
   if (!authenticated) {
@@ -487,13 +488,7 @@ export default function AdminPage() {
                       </td>
                       <td style={{ textAlign: 'right' }}>
                           <button
-                            onClick={() => {
-                              handleDelete(item.id);
-                              // Force re-fetch from storage to update UI if it was a default item
-                              if (!item.id.startsWith('admin-')) {
-                                setGallery(getAdminGallery());
-                              }
-                            }}
+                            onClick={() => handleDelete(item.id)}
                             title="Delete"
                             style={{
                               color: 'var(--outline)',
@@ -506,7 +501,6 @@ export default function AdminPage() {
                             onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--error)')}
                             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--outline)')}
                           >
-                            {!item.id.startsWith('admin-') && <span className="label-md" style={{ fontSize: 11, marginRight: 8, opacity: 0.7 }}>Default</span>}
                             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>delete</span>
                           </button>
                       </td>
@@ -527,7 +521,7 @@ export default function AdminPage() {
               marginTop: 'auto',
             }}>
               <span className="body-md" style={{ color: 'var(--on-surface-variant)', fontSize: 14 }}>
-                {gallery.length} admin-uploaded, {allItems.length - gallery.length} default
+                {allItems.length} photos total
               </span>
             </div>
           </div>

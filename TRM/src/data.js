@@ -133,52 +133,49 @@ export const METRICS = [
 // Admin password
 export const ADMIN_PASSWORD = 'admin123';
 
-// LocalStorage keys
-const STORAGE_KEY = 'trm_admin_gallery';
+const API_URL = 'http://localhost:5000/api/gallery';
 const AUTH_KEY = 'trm_admin_auth';
 
 // Gallery helpers
-export function getAdminGallery() {
+export async function getAllGalleryItems() {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('Failed to fetch gallery items');
+    const data = await res.json();
+    // Map _id to id for frontend compatibility
+    return data.map(item => ({ ...item, id: item._id }));
+  } catch (error) {
+    console.error('Error fetching gallery:', error);
     return [];
   }
 }
 
-export function saveAdminGallery(items) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-}
-
-export function addGalleryItem(item) {
-  const items = getAdminGallery();
-  items.unshift({ ...item, id: `admin-${Date.now()}` });
-  saveAdminGallery(items);
-  return items;
-}
-
-export function deleteGalleryItem(id) {
-  if (id.startsWith('admin-')) {
-    const items = getAdminGallery().filter(item => item.id !== id);
-    saveAdminGallery(items);
-    return items;
-  } else {
-    // It's a default item, add to hidden list
-    const hidden = JSON.parse(localStorage.getItem('trm_hidden_defaults') || '[]');
-    if (!hidden.includes(id)) {
-      hidden.push(id);
-      localStorage.setItem('trm_hidden_defaults', JSON.stringify(hidden));
-    }
-    return getAdminGallery(); // The component will re-fetch all items
+export async function addGalleryItem(item) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item),
+    });
+    if (!res.ok) throw new Error('Failed to save gallery item');
+    return await res.json();
+  } catch (error) {
+    console.error('Error saving gallery item:', error);
+    throw error;
   }
 }
 
-export function getAllGalleryItems() {
-  const adminItems = getAdminGallery();
-  const hidden = JSON.parse(localStorage.getItem('trm_hidden_defaults') || '[]');
-  const visibleDefaults = DEFAULT_GALLERY.filter(item => !hidden.includes(item.id));
-  return [...adminItems, ...visibleDefaults];
+export async function deleteGalleryItem(id) {
+  try {
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete gallery item');
+    return true;
+  } catch (error) {
+    console.error('Error deleting gallery item:', error);
+    throw error;
+  }
 }
 
 // Auth helpers
