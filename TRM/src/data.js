@@ -116,7 +116,8 @@ export function getImageUrl(imagePath) {
   if (imagePath.startsWith('http') || imagePath.startsWith('data:')) return imagePath;
   // If it's an uploaded file from backend
   if (imagePath.startsWith('/uploads')) {
-    return `http://localhost:5000${imagePath}`;
+    const backendDomain = API_BASE.replace('/api', '');
+    return `${backendDomain}${imagePath}`;
   }
   // If it's a local public asset
   return imagePath;
