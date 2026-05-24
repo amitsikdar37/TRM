@@ -1,8 +1,14 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const Gallery = require('./models/Gallery');
+const Theme = require('./models/Theme');
+const Metric = require('./models/Metric');
+const Event = require('./models/Event');
+const Leadership = require('./models/Leadership');
 
 const IMAGES = {
+  logo: '/logo/trmlogo.jpg',
+  hero: '/backgroundheroimage.jpg',
   community1: '/openairmovienight.jpg',
   community2: '/techliteracyworkshop.jpg',
   community3: '/winteroutreachdrive.jpg',
@@ -12,6 +18,56 @@ const IMAGES = {
   leaders1: '/communitiesleadersgathering.jpg',
   leaders2: '/eventcoordinationmeeting.jpg',
 };
+
+const DEFAULT_METRICS = [
+  { icon: 'school', value: 500, suffix: '+', label: 'Children Educated', order: 1 },
+  { icon: 'local_hospital', value: 1200, suffix: '+', label: 'Medical Aids Provided', order: 2 },
+  { icon: 'restaurant', value: 10000, suffix: '+', label: 'Meals Distributed', order: 3 },
+];
+
+const DEFAULT_EVENTS = [
+  {
+    title: 'Agape Home Independence Day',
+    description: 'Flag hoisting ceremony and community gathering with the children of Agape Home.',
+    category: 'Education',
+    progress: 85,
+    status: 'Upcoming',
+    image: IMAGES.hero,
+  },
+  {
+    title: 'Free Medical Camp',
+    description: 'Providing basic healthcare checkups and essential medicines to underserved communities in Jalpaiguri.',
+    category: 'Health',
+    progress: 40,
+    status: 'Ongoing',
+    image: IMAGES.community2,
+  },
+  {
+    title: 'Winter Blanket Drive',
+    description: 'Collecting and distributing warm blankets to protect the homeless during the harsh winter months.',
+    category: 'Community',
+    progress: 100,
+    status: 'Completed',
+    image: IMAGES.community3,
+  },
+];
+
+const DEFAULT_LEADERSHIP = [
+  { 
+    title: 'Local Distribution Team', 
+    desc: 'Our dedicated local coordinators working directly with families to ensure equitable distribution of essential resources.',
+    badge: 'Community Outreach', 
+    badgeBg: 'var(--secondary)', 
+    image: IMAGES.leaders1
+  },
+  { 
+    title: 'Event Coordinators', 
+    desc: 'Organizing structural support and maintaining the operational transparency that builds lasting trust within the communities we serve.',
+    badge: 'Leadership', 
+    badgeBg: 'var(--primary)', 
+    image: IMAGES.leaders2
+  },
+];
 
 const DEFAULT_GALLERY = [
   {
@@ -95,7 +151,23 @@ mongoose.connect(mongoUri)
 
     // Insert default items
     await Gallery.insertMany(DEFAULT_GALLERY);
-    console.log(`Successfully seeded ${DEFAULT_GALLERY.length} items!`);
+    console.log(`Successfully seeded ${DEFAULT_GALLERY.length} gallery items!`);
+
+    await Theme.deleteMany({});
+    await Theme.create({});
+    console.log('Successfully seeded default Theme!');
+
+    await Metric.deleteMany({});
+    await Metric.insertMany(DEFAULT_METRICS);
+    console.log(`Successfully seeded ${DEFAULT_METRICS.length} metrics!`);
+
+    await Event.deleteMany({});
+    await Event.insertMany(DEFAULT_EVENTS);
+    console.log(`Successfully seeded ${DEFAULT_EVENTS.length} events!`);
+
+    await Leadership.deleteMany({});
+    await Leadership.insertMany(DEFAULT_LEADERSHIP);
+    console.log(`Successfully seeded ${DEFAULT_LEADERSHIP.length} leadership members!`);
 
     mongoose.connection.close();
   })

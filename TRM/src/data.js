@@ -92,57 +92,39 @@ export const DEFAULT_GALLERY = [
   },
 ];
 
-// Events for home page
-export const EVENTS = [
-  {
-    id: 'e1',
-    title: 'Agape Home Independence Day',
-    description: 'Flag hoisting ceremony and community gathering with the children of Agape Home.',
-    category: 'Education',
-    progress: 85,
-    status: 'Upcoming',
-    image: IMAGES.hero,
-  },
-  {
-    id: 'e2',
-    title: 'Free Medical Camp',
-    description: 'Providing basic healthcare checkups and essential medicines to underserved communities in Jalpaiguri.',
-    category: 'Health',
-    progress: 40,
-    status: 'Ongoing',
-    image: IMAGES.community2,
-  },
-  {
-    id: 'e3',
-    title: 'Winter Blanket Drive',
-    description: 'Collecting and distributing warm blankets to protect the homeless during the harsh winter months.',
-    category: 'Community',
-    progress: 100,
-    status: 'Completed',
-    image: IMAGES.community3,
-  },
-];
-
-// Impact metrics
-export const METRICS = [
-  { icon: 'school', value: 500, suffix: '+', label: 'Children Educated' },
-  { icon: 'local_hospital', value: 1200, suffix: '+', label: 'Medical Aids Provided' },
-  { icon: 'restaurant', value: 10000, suffix: '+', label: 'Meals Distributed' },
-];
+// Impact messages for donation
+export const IMPACT_MESSAGES = {
+  25: 'A $25 donation covers essential health supplies for one child for a month.',
+  50: 'A $50 donation provides a family with emergency food supplies for two weeks.',
+  100: 'A $100 donation funds a community clean-water station for an entire village.',
+  250: "A $250 donation sponsors a student's educational materials for a full year.",
+  custom: 'Every contribution, big or small, directly fuels our on-the-ground community programs.',
+};
 
 // Admin password
 export const ADMIN_PASSWORD = 'admin123';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/gallery';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const AUTH_KEY = 'trm_admin_auth';
+
+// Helper to format image URLs
+export function getImageUrl(imagePath) {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http') || imagePath.startsWith('data:')) return imagePath;
+  // If it's an uploaded file from backend
+  if (imagePath.startsWith('/uploads')) {
+    return `http://localhost:5000${imagePath}`;
+  }
+  // If it's a local public asset
+  return imagePath;
+}
 
 // Gallery helpers
 export async function getAllGalleryItems() {
   try {
-    const res = await fetch(API_URL);
+    const res = await fetch(`${API_BASE}/gallery`);
     if (!res.ok) throw new Error('Failed to fetch gallery items');
     const data = await res.json();
-    // Map _id to id for frontend compatibility
     return data.map(item => ({ ...item, id: item._id }));
   } catch (error) {
     console.error('Error fetching gallery:', error);
@@ -152,7 +134,7 @@ export async function getAllGalleryItems() {
 
 export async function addGalleryItem(item) {
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch(`${API_BASE}/gallery`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item),
@@ -167,13 +149,142 @@ export async function addGalleryItem(item) {
 
 export async function deleteGalleryItem(id) {
   try {
-    const res = await fetch(`${API_URL}/${id}`, {
+    const res = await fetch(`${API_BASE}/gallery/${id}`, {
       method: 'DELETE',
     });
     if (!res.ok) throw new Error('Failed to delete gallery item');
     return true;
   } catch (error) {
     console.error('Error deleting gallery item:', error);
+    throw error;
+  }
+}
+
+// Theme helpers
+export async function getTheme() {
+  try {
+    const res = await fetch(`${API_BASE}/theme`);
+    return await res.json();
+  } catch (error) {
+    console.error('Error fetching theme:', error);
+    return null;
+  }
+}
+
+export async function updateTheme(theme) {
+  try {
+    const res = await fetch(`${API_BASE}/theme`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(theme),
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('Error updating theme:', error);
+    throw error;
+  }
+}
+
+// Metrics helpers
+export async function getMetrics() {
+  try {
+    const res = await fetch(`${API_BASE}/metrics`);
+    const data = await res.json();
+    return data.map(item => ({ ...item, id: item._id }));
+  } catch (error) {
+    console.error('Error fetching metrics:', error);
+    return [];
+  }
+}
+
+export async function updateMetric(id, data) {
+  try {
+    const res = await fetch(`${API_BASE}/metrics/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('Error updating metric:', error);
+    throw error;
+  }
+}
+
+// Events helpers
+export async function getEvents() {
+  try {
+    const res = await fetch(`${API_BASE}/events`);
+    const data = await res.json();
+    return data.map(item => ({ ...item, id: item._id }));
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    return [];
+  }
+}
+
+export async function addEvent(formData) {
+  try {
+    const res = await fetch(`${API_BASE}/events`, {
+      method: 'POST',
+      body: formData, // FormData sends multipart/form-data automatically
+    });
+    if (!res.ok) throw new Error('Failed to save event');
+    return await res.json();
+  } catch (error) {
+    console.error('Error saving event:', error);
+    throw error;
+  }
+}
+
+export async function deleteEvent(id) {
+  try {
+    const res = await fetch(`${API_BASE}/events/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete event');
+    return true;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+}
+
+// Leadership helpers
+export async function getLeadership() {
+  try {
+    const res = await fetch(`${API_BASE}/leadership`);
+    const data = await res.json();
+    return data.map(item => ({ ...item, id: item._id }));
+  } catch (error) {
+    console.error('Error fetching leadership:', error);
+    return [];
+  }
+}
+
+export async function addLeadership(formData) {
+  try {
+    const res = await fetch(`${API_BASE}/leadership`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!res.ok) throw new Error('Failed to save leadership member');
+    return await res.json();
+  } catch (error) {
+    console.error('Error saving leadership member:', error);
+    throw error;
+  }
+}
+
+export async function deleteLeadership(id) {
+  try {
+    const res = await fetch(`${API_BASE}/leadership/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) throw new Error('Failed to delete leadership member');
+    return true;
+  } catch (error) {
+    console.error('Error deleting leadership member:', error);
     throw error;
   }
 }
@@ -195,14 +306,7 @@ export function logoutAdmin() {
   sessionStorage.removeItem(AUTH_KEY);
 }
 
-// Impact messages for donation
-export const IMPACT_MESSAGES = {
-  25: 'A $25 donation covers essential health supplies for one child for a month.',
-  50: 'A $50 donation provides a family with emergency food supplies for two weeks.',
-  100: 'A $100 donation funds a community clean-water station for an entire village.',
-  250: "A $250 donation sponsors a student's educational materials for a full year.",
-  custom: 'Every contribution, big or small, directly fuels our on-the-ground community programs.',
-};
+
 
 // Category badge class mapping
 export function getBadgeClass(category) {

@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { IMAGES, EVENTS, METRICS, getBadgeClass } from '../data';
+import { IMAGES, getBadgeClass, getMetrics, getEvents, getImageUrl } from '../data';
+import { useState } from 'react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,8 +12,16 @@ export default function HomePage() {
   const metricsRef = useRef(null);
   const eventsRef = useRef(null);
 
+  const [metrics, setMetrics] = useState([]);
+  const [events, setEvents] = useState([]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    Promise.all([getMetrics(), getEvents()]).then(([metricsData, eventsData]) => {
+      setMetrics(metricsData);
+      setEvents(eventsData);
+    });
 
     const ctx = gsap.context(() => {
       // Hero animations
@@ -31,23 +40,34 @@ export default function HomePage() {
         yoyo: true,
         ease: 'sine.inOut',
       });
+    });
 
+    return () => ctx.revert();
+  }, []);
+
+  // Separate useEffect for animations that depend on dynamic data
+  useEffect(() => {
+    if (metrics.length === 0 && events.length === 0) return;
+
+    const ctx = gsap.context(() => {
       // Impact metrics - counter animation
-      gsap.fromTo(
-        '.metric-card',
-        { y: 60, opacity: 0, scale: 0.9 },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.7,
-          stagger: 0.2,
-          scrollTrigger: {
-            trigger: metricsRef.current,
-            start: 'top 80%',
-          },
-        }
-      );
+      if (metrics.length > 0) {
+        gsap.fromTo(
+          '.metric-card',
+          { y: 60, opacity: 0, scale: 0.9 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.7,
+            stagger: 0.2,
+            scrollTrigger: {
+              trigger: metricsRef.current,
+              start: 'top 80%',
+            },
+          }
+        );
+      }
 
       // Animate counter numbers
       document.querySelectorAll('.counter-value').forEach((el) => {
@@ -76,24 +96,26 @@ export default function HomePage() {
       });
 
       // Event cards
-      gsap.fromTo(
-        '.event-card',
-        { y: 50, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.15,
-          scrollTrigger: {
-            trigger: eventsRef.current,
-            start: 'top 80%',
-          },
-        }
-      );
+      if (events.length > 0) {
+        gsap.fromTo(
+          '.event-card',
+          { y: 50, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            stagger: 0.15,
+            scrollTrigger: {
+              trigger: eventsRef.current,
+              start: 'top 80%',
+            },
+          }
+        );
+      }
     });
 
     return () => ctx.revert();
-  }, []);
+  }, [metrics, events]);
 
   return (
     <main>
@@ -233,7 +255,7 @@ export default function HomePage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-gutter)' }}>
-          {METRICS.map((m, i) => (
+          {metrics.map((m, i) => (
             <div
               key={m.label}
               className="metric-card"
@@ -340,7 +362,7 @@ export default function HomePage() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-gutter)' }}>
-            {EVENTS.map((event) => (
+            {events.map((event) => (
               <div
                 key={event.id}
                 className="event-card card"
@@ -349,7 +371,7 @@ export default function HomePage() {
                 {/* Image */}
                 <div style={{ height: 200, position: 'relative', overflow: 'hidden' }}>
                   <img
-                    src={event.image}
+                    src={getImageUrl(event.image)}
                     alt={event.title}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
                     onMouseEnter={(e) => (e.target.style.transform = 'scale(1.05)')}

@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { IMAGES } from '../data';
+import { getLeadership, getImageUrl } from '../data';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -32,9 +32,11 @@ const VALUES = [
 
 export default function AboutPage() {
   const pageRef = useRef(null);
+  const [leadership, setLeadership] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    getLeadership().then(setLeadership);
 
     const ctx = gsap.context(() => {
       // Hero
@@ -202,12 +204,9 @@ export default function AboutPage() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-xl)' }}>
-            {[
-              { img: IMAGES.leaders1, badge: 'Community Outreach', badgeBg: 'var(--secondary)', title: 'Local Distribution Team', desc: 'Our dedicated local coordinators working directly with families to ensure equitable distribution of essential resources.' },
-              { img: IMAGES.leaders2, badge: 'Leadership', badgeBg: 'var(--primary)', title: 'Event Coordinators', desc: 'Organizing structural support and maintaining the operational transparency that builds lasting trust within the communities we serve.' },
-            ].map((member, i) => (
+            {leadership.map((member, i) => (
               <div
-                key={i}
+                key={member.id || i}
                 className="team-card"
                 style={{
                   background: 'var(--surface)',
@@ -219,7 +218,7 @@ export default function AboutPage() {
               >
                 <div style={{ aspectRatio: '16/9', overflow: 'hidden', position: 'relative' }}>
                   <img
-                    src={member.img}
+                    src={getImageUrl(member.image)}
                     alt={member.title}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
                     onMouseEnter={(e) => (e.target.style.transform = 'scale(1.05)')}
@@ -236,7 +235,7 @@ export default function AboutPage() {
                     <span
                       className="label-md"
                       style={{
-                        background: member.badgeBg + 'e6',
+                        background: (member.badgeBg || 'var(--primary)') + 'e6',
                         color: 'white',
                         padding: '4px 12px',
                         borderRadius: 'var(--radius-full)',

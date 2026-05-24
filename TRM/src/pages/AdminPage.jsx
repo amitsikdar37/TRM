@@ -8,13 +8,25 @@ import {
   deleteGalleryItem,
   getAllGalleryItems,
 } from '../data';
+import ThemeSettings from '../components/ThemeSettings';
+import MetricsManager from '../components/MetricsManager';
+import EventsManager from '../components/EventsManager';
+import LeadershipManager from '../components/LeadershipManager';
 
 const CATEGORIES = ['Health', 'Education', 'Relief', 'Community', 'Culture'];
+const TABS = [
+  { id: 'gallery', label: 'Gallery', icon: 'photo_library' },
+  { id: 'events', label: 'Events', icon: 'event' },
+  { id: 'metrics', label: 'Metrics', icon: 'bar_chart' },
+  { id: 'leadership', label: 'Leadership', icon: 'group' },
+  { id: 'theme', label: 'Theme', icon: 'palette' },
+];
 
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('gallery');
   const [allItems, setAllItems] = useState([]);
   const [form, setForm] = useState({ title: '', date: '', category: 'Health', description: '' });
   const [dragOver, setDragOver] = useState(false);
@@ -256,276 +268,310 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Grid: Upload + Table */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--space-gutter)' }} className="admin-grid">
-          {/* Upload Card */}
-          <div style={{
-            background: 'var(--surface-container-low)',
-            borderRadius: 'var(--radius-xl)',
-            border: '1px solid var(--outline-variant)',
-            padding: 'var(--space-gutter)',
-            boxShadow: 'var(--ambient-shadow)',
-          }}>
-            <h2 className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 'var(--space-gutter)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="material-symbols-outlined" style={{ color: 'var(--primary)' }}>cloud_upload</span>
-              New Upload
-            </h2>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-xl)', overflowX: 'auto', paddingBottom: 'var(--space-xs)' }}>
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 20px',
+                borderRadius: 'var(--radius-full)',
+                background: activeTab === tab.id ? 'var(--primary)' : 'var(--surface-container-high)',
+                color: activeTab === tab.id ? 'var(--on-primary)' : 'var(--on-surface)',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: activeTab === tab.id ? 700 : 500,
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s',
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-            <form onSubmit={handlePublish} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-              {/* Drop Zone */}
-              <div
-                className={`drop-zone ${dragOver ? 'dragover' : ''}`}
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={handleDrop}
-                id="photo-drop-zone"
-              >
-                {preview ? (
-                  <div style={{ position: 'relative' }}>
-                    <img
-                      src={preview}
-                      alt="Preview"
-                      style={{ maxHeight: 180, borderRadius: 'var(--radius-md)', margin: '0 auto' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPreview(null);
-                        setFileData(null);
-                      }}
-                      style={{
-                        position: 'absolute',
-                        top: -8,
-                        right: -8,
-                        width: 28,
-                        height: 28,
-                        borderRadius: '50%',
-                        background: 'var(--error)',
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 16,
-                      }}
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined" style={{ fontSize: 40, color: 'var(--outline)', display: 'block', marginBottom: 'var(--space-sm)' }}>
-                      add_photo_alternate
-                    </span>
-                    <p className="label-md" style={{ color: 'var(--on-surface-variant)' }}>Drag & drop photos here</p>
-                    <p className="body-md" style={{ color: 'var(--outline)', fontSize: 14, marginTop: 4 }}>or click to browse</p>
-                  </>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileSelect(e.target.files[0])}
-                  style={{ display: 'none' }}
-                  id="photo-file-input"
-                />
-              </div>
+        {/* Tab Content */}
+        {activeTab === 'theme' && <ThemeSettings />}
+        {activeTab === 'metrics' && <MetricsManager />}
+        {activeTab === 'events' && <EventsManager />}
+        {activeTab === 'leadership' && <LeadershipManager />}
 
-              {/* Fields */}
-              <div>
-                <label className="input-label" htmlFor="event-title">Event Title</label>
-                <input
-                  className="input-field"
-                  id="event-title"
-                  type="text"
-                  placeholder="e.g. Clean Water Initiative 2024"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  required
-                />
-              </div>
+        {activeTab === 'gallery' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'var(--space-gutter)' }} className="admin-grid">
+            {/* Upload Card */}
+            <div style={{
+              background: 'var(--surface-container-low)',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--outline-variant)',
+              padding: 'var(--space-gutter)',
+              boxShadow: 'var(--ambient-shadow)',
+            }}>
+              <h2 className="headline-md" style={{ color: 'var(--on-surface)', marginBottom: 'var(--space-gutter)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span className="material-symbols-outlined" style={{ color: 'var(--primary)' }}>cloud_upload</span>
+                New Upload
+              </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
-                <div>
-                  <label className="input-label" htmlFor="event-date">Date</label>
+              <form onSubmit={handlePublish} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                {/* Drop Zone */}
+                <div
+                  className={`drop-zone ${dragOver ? 'dragover' : ''}`}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  id="photo-drop-zone"
+                >
+                  {preview ? (
+                    <div style={{ position: 'relative' }}>
+                      <img
+                        src={preview}
+                        alt="Preview"
+                        style={{ maxHeight: 180, borderRadius: 'var(--radius-md)', margin: '0 auto' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPreview(null);
+                          setFileData(null);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: -8,
+                          right: -8,
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          background: 'var(--error)',
+                          color: 'white',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 16,
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined" style={{ fontSize: 40, color: 'var(--outline)', display: 'block', marginBottom: 'var(--space-sm)' }}>
+                        add_photo_alternate
+                      </span>
+                      <p className="label-md" style={{ color: 'var(--on-surface-variant)' }}>Drag & drop photos here</p>
+                      <p className="body-md" style={{ color: 'var(--outline)', fontSize: 14, marginTop: 4 }}>or click to browse</p>
+                    </>
+                  )}
                   <input
-                    className="input-field"
-                    id="event-date"
-                    type="date"
-                    value={form.date}
-                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleFileSelect(e.target.files[0])}
+                    style={{ display: 'none' }}
+                    id="photo-file-input"
                   />
                 </div>
+
+                {/* Fields */}
                 <div>
-                  <label className="input-label" htmlFor="event-category">Category</label>
-                  <select
+                  <label className="input-label" htmlFor="event-title">Event Title</label>
+                  <input
                     className="input-field"
-                    id="event-category"
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                    id="event-title"
+                    type="text"
+                    placeholder="e.g. Clean Water Initiative 2024"
+                    value={form.title}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    required
+                  />
                 </div>
-              </div>
 
-              <div>
-                <label className="input-label" htmlFor="event-desc">Description</label>
-                <textarea
-                  className="input-field"
-                  id="event-desc"
-                  rows={3}
-                  placeholder="Brief context for these photos..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  style={{ resize: 'none' }}
-                />
-              </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
+                  <div>
+                    <label className="input-label" htmlFor="event-date">Date</label>
+                    <input
+                      className="input-field"
+                      id="event-date"
+                      type="date"
+                      value={form.date}
+                      onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="input-label" htmlFor="event-category">Category</label>
+                    <select
+                      className="input-field"
+                      id="event-category"
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    >
+                      {CATEGORIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-              <button
-                className="btn btn-primary"
-                type="submit"
-                style={{ width: '100%', padding: '12px' }}
-                disabled={!form.title || !fileData}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>publish</span>
-                Publish to Gallery
-              </button>
-            </form>
-          </div>
+                <div>
+                  <label className="input-label" htmlFor="event-desc">Description</label>
+                  <textarea
+                    className="input-field"
+                    id="event-desc"
+                    rows={3}
+                    placeholder="Brief context for these photos..."
+                    value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    style={{ resize: 'none' }}
+                  />
+                </div>
 
-          {/* Gallery Manager */}
-          <div style={{
-            background: 'var(--surface-container-low)',
-            borderRadius: 'var(--radius-xl)',
-            border: '1px solid var(--outline-variant)',
-            overflow: 'hidden',
-            boxShadow: 'var(--ambient-shadow)',
-            display: 'flex',
-            flexDirection: 'column',
-          }}>
-            <div style={{
-              padding: 'var(--space-gutter)',
-              borderBottom: '1px solid var(--outline-variant)',
-              background: 'var(--surface)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: 'var(--space-sm)',
-            }}>
-              <h2 className="headline-md" style={{ color: 'var(--on-surface)', display: 'flex', alignItems: 'center', gap: 8, fontSize: 20 }}>
-                <span className="material-symbols-outlined" style={{ color: 'var(--primary)' }}>photo_library</span>
-                Manage Gallery
-              </h2>
+                <button
+                  className="btn btn-primary"
+                  type="submit"
+                  style={{ width: '100%', padding: '12px' }}
+                  disabled={!form.title || !fileData}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>publish</span>
+                  Publish to Gallery
+                </button>
+              </form>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Preview</th>
-                    <th>Event Title</th>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allItems.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div style={{
-                          width: 64,
-                          height: 48,
-                          borderRadius: 'var(--radius-sm)',
-                          overflow: 'hidden',
-                          background: 'var(--surface-variant)',
-                        }}>
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        </div>
-                      </td>
-                      <td>
-                        <span className="body-md" style={{ fontWeight: 500, color: 'var(--on-surface)' }}>
-                          {item.title}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="body-md" style={{ color: 'var(--on-surface-variant)', fontSize: 14 }}>
-                          {item.date ? new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          className="label-md"
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: 'var(--radius-full)',
-                            fontSize: 12,
-                            background:
-                              item.category === 'Education' ? 'var(--primary-container)' :
-                              item.category === 'Health' ? 'var(--tertiary-container)' :
-                              item.category === 'Relief' ? 'var(--secondary-container)' :
-                              item.category === 'Culture' ? 'var(--tertiary-fixed)' :
-                              'var(--secondary-container)',
-                            color:
-                              item.category === 'Education' ? 'var(--on-primary-container)' :
-                              item.category === 'Health' ? 'var(--on-tertiary-container)' :
-                              item.category === 'Relief' ? 'var(--on-secondary-container)' :
-                              item.category === 'Culture' ? 'var(--on-tertiary-fixed)' :
-                              'var(--on-secondary-container)',
-                          }}
-                        >
-                          {item.category}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            title="Delete"
-                            style={{
-                              color: 'var(--outline)',
-                              padding: 4,
-                              transition: 'color 0.2s',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 4
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--error)')}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--outline)')}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>delete</span>
-                          </button>
-                      </td>
+            {/* Gallery Manager */}
+            <div style={{
+              background: 'var(--surface-container-low)',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--outline-variant)',
+              overflow: 'hidden',
+              boxShadow: 'var(--ambient-shadow)',
+              display: 'flex',
+              flexDirection: 'column',
+            }}>
+              <div style={{
+                padding: 'var(--space-gutter)',
+                borderBottom: '1px solid var(--outline-variant)',
+                background: 'var(--surface)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 'var(--space-sm)',
+              }}>
+                <h2 className="headline-md" style={{ color: 'var(--on-surface)', display: 'flex', alignItems: 'center', gap: 8, fontSize: 20 }}>
+                  <span className="material-symbols-outlined" style={{ color: 'var(--primary)' }}>photo_library</span>
+                  Manage Gallery
+                </h2>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Preview</th>
+                      <th>Event Title</th>
+                      <th>Date</th>
+                      <th>Category</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {allItems.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div style={{
+                            width: 64,
+                            height: 48,
+                            borderRadius: 'var(--radius-sm)',
+                            overflow: 'hidden',
+                            background: 'var(--surface-variant)',
+                          }}>
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                        </td>
+                        <td>
+                          <span className="body-md" style={{ fontWeight: 500, color: 'var(--on-surface)' }}>
+                            {item.title}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="body-md" style={{ color: 'var(--on-surface-variant)', fontSize: 14 }}>
+                            {item.date ? new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-'}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className="label-md"
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: 'var(--radius-full)',
+                              fontSize: 12,
+                              background:
+                                item.category === 'Education' ? 'var(--primary-container)' :
+                                item.category === 'Health' ? 'var(--tertiary-container)' :
+                                item.category === 'Relief' ? 'var(--secondary-container)' :
+                                item.category === 'Culture' ? 'var(--tertiary-fixed)' :
+                                'var(--secondary-container)',
+                              color:
+                                item.category === 'Education' ? 'var(--on-primary-container)' :
+                                item.category === 'Health' ? 'var(--on-tertiary-container)' :
+                                item.category === 'Relief' ? 'var(--on-secondary-container)' :
+                                item.category === 'Culture' ? 'var(--on-tertiary-fixed)' :
+                                'var(--on-secondary-container)',
+                            }}
+                          >
+                            {item.category}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              title="Delete"
+                              style={{
+                                color: 'var(--outline)',
+                                padding: 4,
+                                transition: 'color 0.2s',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--error)')}
+                              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--outline)')}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>delete</span>
+                            </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-            {/* Footer */}
-            <div style={{
-              padding: 'var(--space-sm) var(--space-gutter)',
-              borderTop: '1px solid var(--outline-variant)',
-              background: 'var(--surface)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: 'auto',
-            }}>
-              <span className="body-md" style={{ color: 'var(--on-surface-variant)', fontSize: 14 }}>
-                {allItems.length} photos total
-              </span>
+              {/* Footer */}
+              <div style={{
+                padding: 'var(--space-sm) var(--space-gutter)',
+                borderTop: '1px solid var(--outline-variant)',
+                background: 'var(--surface)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: 'auto',
+              }}>
+                <span className="body-md" style={{ color: 'var(--on-surface-variant)', fontSize: 14 }}>
+                  {allItems.length} photos total
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <style>{`

@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from './components/Navbar';
@@ -9,6 +9,7 @@ import AboutPage from './pages/AboutPage';
 import GalleryPage from './pages/GalleryPage';
 import ContactPage from './pages/ContactPage';
 import AdminPage from './pages/AdminPage';
+import { getTheme } from './data';
 import './index.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -26,6 +27,28 @@ function ScrollToTop() {
 function App() {
   const location = useLocation();
   const isAdmin = location.pathname === '/admin';
+  const [themeLoaded, setThemeLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadTheme() {
+      const theme = await getTheme();
+      if (theme) {
+        const root = document.documentElement;
+        if (theme.primary) root.style.setProperty('--primary', theme.primary);
+        if (theme.onPrimary) root.style.setProperty('--on-primary', theme.onPrimary);
+        if (theme.primaryContainer) root.style.setProperty('--primary-container', theme.primaryContainer);
+        if (theme.onPrimaryContainer) root.style.setProperty('--on-primary-container', theme.onPrimaryContainer);
+        if (theme.secondary) root.style.setProperty('--secondary', theme.secondary);
+        if (theme.onSecondary) root.style.setProperty('--on-secondary', theme.onSecondary);
+        if (theme.surface) root.style.setProperty('--surface', theme.surface);
+        if (theme.onSurface) root.style.setProperty('--on-surface', theme.onSurface);
+      }
+      setThemeLoaded(true);
+    }
+    loadTheme();
+  }, []);
+
+  if (!themeLoaded) return null; // Avoid flashing old colors
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
