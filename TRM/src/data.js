@@ -104,7 +104,10 @@ export const IMPACT_MESSAGES = {
 // Admin password
 export const ADMIN_PASSWORD = 'admin123';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+let API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+if (API_BASE.endsWith('/gallery')) {
+  API_BASE = API_BASE.slice(0, -8);
+}
 const AUTH_KEY = 'trm_admin_auth';
 
 // Helper to format image URLs
